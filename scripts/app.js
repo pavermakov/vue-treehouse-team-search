@@ -5,7 +5,7 @@ var source = {
     api: 'https://teamtreehouse.com/',
     errorMessage: '',
     profile: null,
-    text: 'Christopher Stuart',
+    text: '',
     requestState: {
       uninitialized: 0,
       loading: 1,
