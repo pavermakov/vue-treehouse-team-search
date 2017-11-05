@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Treehouse Team Search</title>
+  <meta name="description" content="Check out badges and earned points of the Treehouse Community">
+  <meta name="image" content="img/treehouse-logo.png">
+  <meta name="keywords" content="treehouse, education, javascript, css, html, community, team,  vue, front end, development, web development">
+  <!-- Schema.org for Google -->
+  <meta itemprop="name" content="Treehouse Community Search">
+  <meta itemprop="description" content="Check out badges and earned points of the Treehouse Community">
+  <meta itemprop="image" content="https://static.teamtreehouse.com/assets/marketing/opengraph/logo_facebook-5a7642409483233360d948ca4dd6840de0a6083475af4b047d452b77b00ca68a.png">
+  <!-- Open Graph general (Facebook, Pinterest & Google+) -->
+  <meta name="og:title" content="Treehouse Team Search">
+  <meta name="og:description" content="Check out badges and earned points of the Treehouse Community">
+  <meta name="og:image" content="https://static.teamtreehouse.com/assets/marketing/opengraph/logo_facebook-5a7642409483233360d948ca4dd6840de0a6083475af4b047d452b77b00ca68a.png">
+  <meta name="og:url" content="http://treehouse-team-search.surge.sh/">
+  <meta name="og:site_name" content="Treehouse Community Search">
+  <meta name="fb:admins" content="100001071520207">
+  <meta name="og:type" content="website">
+  <!-- styles -->
+  <link rel="shortcut icon" href="img/favicon.png">
+  <link rel="stylesheet" href="styles/reset.css">
+  <link rel="stylesheet" href="styles/app.css">
+  <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
+</head>
+<body>
+  <div class="wrapper">
+    <div class="app transparent" id="app">
+      <div class="container">
+        <div class="card card_wide card_justified" v-if="!!profile">
+          <span class="card__navigator action" @click="restart">
+            <img class="action__icon" src="img/arrow.svg" alt="go back">
+          </span>
+
+          <div class="profile">
+            <div class="profile__item text text_centered">
+              <a class="profile__url" :href="profile.profile_url" target="_blank">
+                <img class="profile__image" :src="profile.gravatar_url" alt="profile image">
+              </a>
+            </div><!-- .profile__item -->
+
+            <div class="profile__item">
+              <span class="profile__name text text_medium">{{ profile.name }}</span>
+            </div><!-- .profile__item -->
+
+            <div class="profile__item profile__item_expanded">
+              <div class="profile__stats">
+                <div class="profile__stat stat">
+                  <div class="stat__content">
+                    <span class="stat__counter text text_centered">{{ profile.badges.length }}</span>
+                    <span class="stat__name text text_centered text_gray">badges</span>
+                  </div><!-- .stat__content -->
+                </div><!-- .profile__stat.stat -->
+
+                <div class="profile__stat stat">
+                  <div class="stat__content">
+                    <span class="stat__counter text text_centered">{{ profile.points.total }}</span>
+                    <span class="stat__name text text_centered text_gray">points</span>
+                  </div><!-- .stat__content -->
+                </div><!-- .profile__stat.stat -->
+              </div><!-- .profile__stats -->
+            </div><!-- .profile__item -->
+
+            <div class="profile__item profile__item_expanded profile__item_gray">
+              <ul class="badges-list">
+                <li class="badges-list__item badge" v-for="badge in profile.badges">
+                  <a class="badge__url" :href="badge.url" target="_blank">
+                    <span class="badge__item">
+                      <span class="badge__date text text_centered text_small text_gray">{{ formatDate(badge.earned_date) }}</span>
+                    </span><!-- .badge__item -->
+
+                    <span class="badge__item">
+                      <span class="badge__logo">
+                        <img class="badge__icon" :src="badge.icon_url" :alt="badge.name">
+                      </span>
+                    </span><!-- .badge__item -->
+
+                    <span class="badge__item">
+                      <span class="badge__name text text_centered">{{ badge.name }}</span>
+                    </span><!-- .badge__item -->
+                  </a>
+                </li>
+              </ul><!-- .badges-list -->
+            </div><!-- .profile__item -->
+
+            <div class="profile__item">
+              <ul class="points-list">
+                <li class="points-list__item point text text_white" v-for="point in parsedPoints(profile.points)">
+                  <span class="point__name text text_white text_bold">{{ point.name }}</span>
+                  <span class="point__count text text_bold text_green">{{ point.count }}</span>
+                </li>
+              </ul>
+            </div><!-- .profile__item -->
+          </div><!-- .profile -->
+        </div><!-- .card -->
+
+        <div class="card card_centered" v-else>
+          <form class="search-form" @submit.prevent="search">
+            <div class="search-form__item">
+              <label class="search-form__label text text_large" for="search-field">look up a name:</label>
+            </div><!-- .search-form__item -->
+
+            <div class="search-form__item">
+              <div class="workzone">
+                <input class="search-form__input search-form__input_type_field text" id="search-field" type="text"
+                  placeholder="name" required v-model="text" ref="search-field">
+
+                <button class="search-form__input search-form__input_type_button button text_white" type="submit">
+                  search
+                </button>
+              </div><!-- .workzone -->
+
+              <span class="text text_small text_gray">e.g. Jonathan Schneider</span>
+            </div><!-- .search-form__item -->
+
+            <transition name="fade">
+              <div class="search-form__item" v-if="errorMessage.length > 0">
+                <span class="text text_bold text_red">{{ errorMessage }}</span>
+              </div>
+            </transition>
+          </form>
+
+
+          <transition name="fade">
+            <span class="loader loader_covered" v-if="isLoading">
+              <span class="spinner spinner_green">
+                <span class="spinner__text text text_small text_green">loading</span>
+              </span>
+            </span>
+          </transition>
+        </div><!-- .card -->
+
+        <div class="credits">
+          <span class="credits__text text text_white">
+            Made with <span class="credits__icon text text_red">♥</span> by
+            <a class="credits__link text text_bold text_white" href="https://github.com/pavermakov" target="_blank">Pavel Ermakov</a>
+          </span>
+        </div>
+      </div><!-- .container -->
+    </div><!-- .app -->
+
+    <span class="loader" id="loader">
+      <span class="spinner spinner_white">
+        <span class="spinner__text text text_small text_white">loading</span>
+      </span>
+    </span>
+  </div><!-- .wrapper -->
+
+  <script defer src="https://unpkg.com/vue"></script>
+  <script defer src="scripts/app.js"></script>
+</body>
+</html>
