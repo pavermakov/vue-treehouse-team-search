@@ -191,16 +191,6 @@
     top: 1px;
   }
 
-
-
-
-
-
-
-
-
-
-
 .loader {
   position: absolute;
   top: 0;
@@ -317,5 +307,29 @@
 
   100% {
     opacity: 0;
+  }
+}
+
+@media screen and  (max-width: 768px) {
+  .container {
+    padding-top: 5px;
+    padding-bottom: 50px;
+  }
+
+  .card {
+    min-width: 0;
+  }
+
+  .badges-list {
+    grid-template-columns: 1fr;
+  }
+
+  .credits {
+    position: absolute;
+    bottom: 10px;
+    right: 50%;
+    width: 100%;
+    transform: translateX(50%);
+    text-align: center;
   }
 }
